@@ -1,0 +1,70 @@
+
+逻辑过程:
+
+```
+object Test {
+  @JvmStatic
+  fun main(args: Array<String>) {
+    println(dal2Rpn("a + b * c + ( d * e + f ) * g"))
+    //a b c * + d e * f  + g * +
+  }
+
+  fun dal2Rpn(str: String): String {
+    val sb = StringBuilder()
+    val stack = Stack<Char>()
+    for (i in 0 until str.length) {
+      val tempChar = str[i]
+      if (tempChar == '+' || tempChar == '-' || tempChar == '*' || tempChar == '/'
+        || tempChar == '(' || tempChar == ')'
+      ) {
+        if (stack.isEmpty()) {
+          stack.push(tempChar)
+        } else {
+          if (tempChar == ')') {
+            var popChar = stack.pop()
+            while (popChar != '(') {
+              sb.append(popChar)
+              if (stack.isEmpty()) {
+                break
+              } else {
+                popChar = stack.pop()
+              }
+            }
+          } else {
+            if (isLarge(tempChar, stack.peek())) {
+              stack.push(tempChar)
+            } else {
+              while (!stack.isEmpty() && isLarge(stack.peek(), tempChar)) { //栈顶元素大
+                if (stack.peek() == '(') {
+                  break
+                }
+                sb.append(stack.pop())
+              }
+              stack.push(tempChar)
+            }
+          }
+        }
+      } else {
+        sb.append(tempChar)
+      }
+    }
+    while (!stack.isEmpty()) {
+      sb.append(stack.pop())
+    }
+    return sb.toString()
+  }
+
+  private fun isLarge(charA: Char, charB: Char): Boolean {
+    return (getPrioraty(charA) - getPrioraty(charB)) >= 0
+  }
+
+  private fun getPrioraty(char: Char): Int {
+    return when (char) {
+      '+' -> 0
+      '-' -> 0
+      '*' -> 1
+      '/' -> 1
+      else -> 0
+    }
+  }
+```
